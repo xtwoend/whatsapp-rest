@@ -1,0 +1,23 @@
+## Server Configuration
+SERVER_NAME: "whatsapp-rest"
+SERVER_IP: "0.0.0.0"
+SERVER_PORT: "3000"
+SERVER_STORE_PATH: "./config/stores"
+SERVER_UPLOAD_PATH: "./config/uploads"
+SERVER_UPLOAD_LIMIT: 8
+SERVER_LOG_LEVEL: "info"
+
+## Router Configuration
+ROUTER_BASE_PATH: "/api"
+
+# BASIC AUTH
+AUTH_BASIC_USERNAME: "client"
+AUTH_BASIC_PASSWORD: "secret"
+
+# URL Hook
+WEBHOOK_URL: "http://192.168.43.144:8000/whatsapp/callback"
+
+## WhatsApp Configuration
+WHATSAPP_CLIENT_VERSION_MAJOR: 2
+WHATSAPP_CLIENT_VERSION_MINOR: 2035
+WHATSAPP_CLIENT_VERSION_BUILD: 15
