@@ -184,12 +184,53 @@ func (wah *waHandler) HandleVideoMessage(data whatsapp.VideoMessage)  {
 	}
 }
 
+func (wah *waHandler) HandleDocumentMessage(data whatsapp.DocumentMessage)  {
+
+	if ! data.Info.FromMe && data.Info.Timestamp >= wah.SessionStart {
+
+		authorID := "-"
+		screenName := "-"
+		
+		if data.Info.Source.Participant != nil {
+			authorID = *data.Info.Source.Participant
+		} else {
+			authorID = data.Info.RemoteJid
+		}
+		if data.Info.Source.PushName != nil {
+			screenName = *data.Info.Source.PushName
+		}
+
+		f, err := data.Download()
+		filename := data.Info.Id + "." + strings.Split(data.Type, "/")[1]
+		filepath := server.Config.GetString("SERVER_UPLOAD_PATH") + "/" +  filename
+		file, err := os.Create(filepath)
+		defer file.Close()
+		_, err = file.Write(f)
+		if err != nil {
+			log.Println(log.LogLevelWarn, "Logger Error", err)
+		}
+
+		reqBody := map[string]interface{}{
+			"id": data.Info.Id,
+			"jid": wah.SessionJid,
+			"type": "document",
+			"date": data.Info.Timestamp,
+			"from": authorID,
+			"name": screenName,
+			"file_type": data.Type,
+			"file_url": "http://" + server.Config.GetString("SERVER_IP") + ":" + server.Config.GetString("SERVER_PORT") + "/media/" + filename,
+		}
+
+		callHook(reqBody)
+	}
+}
+
 func (wah *waHandler) HandleJsonMessage(message string) { 
 	var data []interface{}
 	_ = json.Unmarshal([]byte(message), &data)
-	info := data[1].(map[string]interface{})
-	
+
 	if data[0] == "Msg" {
+		info := data[1].(map[string]interface{})
 		ack := info["ack"]
 		myInt := ack.(float64)
 		if info["cmd"] == "ack" && (myInt == 2 || myInt == 3){
